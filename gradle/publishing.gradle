@@ -1,29 +1,67 @@
-buildscript {
-    // Also include the eleven repositories in the buildscript block,
-    // so the gradle plugins can be resolved.
-    apply from: "$rootDir/gradle/eleven-repositories.gradle", to: buildscript
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'com.gradle.plugin-publish'
 
-    dependencies {
-        classpath "gradle.plugin.org.datlowe.maven-publish-auth:buildSrc:2.0.2"
+ext {
+    bintrayUser = resolveProperty('BINTRAY_USER', 'bintrayUser')
+    bintrayKey = resolveProperty('BINTRAY_KEY', 'bintrayKey')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact groovydocJar
+            artifact javadocJar
+        }
     }
 }
 
-// For more info, see: https://plugins.gradle.org/plugin/org.datlowe.maven-publish-auth
-apply plugin: org.hibernate.build.gradle.publish.auth.maven.AuthenticationManager
+artifactoryPublish {
+    onlyIf { isMaster }
+    mustRunAfter 'build'
+    publications 'mavenJava'
+}
 
-publishing {
-    repositories {
-        maven {
-            // CAUTION: Credentials are resolved from ~/.m2/settings.xml by the 'maven-publish-auth' plugin.
-            // The below name should match the name of the server id in the xml file.
-            // if the publish actions fails with an '401 Unauthorized', run the publish task
-            // in the terminal with the additional '--info' or '--debug' flag, to check which credentials are used.
-            // The credentials are cached by the plugin so it could take some time if you make changes to them.
-            name = 'nexus'
+artifactory {
+    contextUrl = 'https://oss.jfrog.org'
 
-            url = version.endsWith('SNAPSHOT') ?
-                    'https://nexus.eleven.nl/content/repositories/snapshots' :
-                    'https://nexus.eleven.nl/content/repositories/releases'
+    publish {
+        repository {
+            repoKey = 'oss-snapshot-local'
+            username = bintrayUser
+            password = bintrayKey
+            maven = true
         }
     }
+}
+
+pluginBundle {
+    website = "https://github.com/elevennl/gradle-node-plugin"
+    vcsUrl = "https://github.com/elevennl/gradle-node-plugin.git"
+
+    plugins {
+        nodePlugin {
+            id = 'nl.eleven.node-gradle.node'
+            displayName = 'Gradle Node Plugin'
+            description = "Gradle plugin for executing node scripts."
+            tags = ['java', 'gradle', 'node', 'yarn', 'npm', 'grunt', 'gulp']
+        }
+    }
+
+    mavenCoordinates {
+        groupId = 'nl.eleven.node-gradle'
+        artifactId = 'gradle-node-plugin'
+    }
+}
+
+String resolveProperty(String envVarKey, String projectPropKey) {
+    String propValue = System.getenv()[envVarKey]
+
+    if (propValue) {
+        return propValue
+    }
+
+    hasProperty(projectPropKey) ? getProperty(projectPropKey) : null
 }
