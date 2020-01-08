@@ -1,57 +1,57 @@
 package com.moowork.gradle.node.npm
 
 import com.moowork.gradle.node.exec.ExecRunner
-import com.moowork.gradle.node.exec.NodeExecRunner
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
+import org.gradle.api.tasks.Internal
 import org.gradle.process.ExecResult
 
-class NpmExecRunner
-    extends ExecRunner
-{
-    public NpmExecRunner( final Project project )
-    {
-        super( project )
+class NpmExecRunner extends ExecRunner {
+
+    public NpmExecRunner(final Project project) {
+        super(project)
     }
 
     @Override
-    protected ExecResult doExecute()
-    {
+    protected ExecResult doExecute() {
 
-        def exec = this.variant.npmExec
+        def exec = getCommand()
         def arguments = this.arguments
 
-        if ( this.ext.download )
-        {
-            def npmBinDir = this.variant.npmBinDir.getAbsolutePath();
-
-            def nodeBinDir = this.variant.nodeBinDir.getAbsolutePath();
-
-            def path = npmBinDir + File.pathSeparator + nodeBinDir;
-
-            // Take care of Windows environments that may contain "Path" OR "PATH" - both existing
-            // possibly (but not in parallel as of now)
-            if ( environment['Path'] != null )
-            {
-                environment['Path'] = path + File.pathSeparator + environment['Path']
-            }
-            else
-            {
-                environment['PATH'] = path + File.pathSeparator + environment['PATH']
-            }
-
-            def File localNpm = project.file( new File( this.ext.nodeModulesDir, 'node_modules/npm/bin/npm-cli.js' ) )
-            if ( localNpm.exists() )
-            {
+        if (this.ext.download) {
+            def File localNpm = getLocalCommandScript()
+            if (localNpm.exists()) {
                 exec = this.variant.nodeExec
                 arguments = [localNpm.absolutePath] + arguments
-            }
-            else if ( !new File(exec).exists() )
-            {
+            } else if (!new File(exec).exists()) {
                 exec = this.variant.nodeExec
-                arguments = [this.variant.npmScriptFile] + arguments
+                arguments = [getCommandScript()] + arguments
             }
         }
-        return run( exec, arguments )
+        return run(exec, arguments)
+    }
+
+    @Internal
+    protected String getCommand() {
+        this.variant.npmExec
+    }
+
+    @Internal
+    protected File getLocalCommandScript() {
+        return project.file(new File(this.ext.nodeModulesDir, 'node_modules/npm/bin/npm-cli.js'))
+    }
+
+    @Internal
+    protected String getCommandScript() {
+        return this.variant.npmScriptFile
+    }
+
+    @Override
+    protected String computeAdditionalBinPath() {
+        if (ext.download) {
+            def npmBinDir = this.variant.npmBinDir.getAbsolutePath();
+            def nodeBinDir = this.variant.nodeBinDir.getAbsolutePath();
+            return npmBinDir + File.pathSeparator + nodeBinDir
+        }
+        return null
     }
 }

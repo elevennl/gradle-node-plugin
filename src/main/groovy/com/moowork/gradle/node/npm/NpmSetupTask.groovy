@@ -13,103 +13,88 @@ import org.gradle.process.ExecResult
  * npm install that only gets executed if gradle decides so.
  **/
 class NpmSetupTask
-    extends DefaultTask
-{
+        extends DefaultTask {
     public final static String NAME = 'npmSetup'
 
     private NpmExecRunner runner
 
     private NodeExtension config
 
+    @Internal
     protected List<?> args = []
 
     private ExecResult result
 
-    NpmSetupTask()
-    {
-        dependsOn( SetupTask.NAME )
+    NpmSetupTask() {
+        dependsOn(SetupTask.NAME)
 
         this.group = 'Node'
         this.description = 'Setup a specific version of npm to be used by the build.'
         this.enabled = false
 
-        this.runner = new NpmExecRunner( this.project )
+        this.runner = new NpmExecRunner(this.project)
     }
 
     @Input
-    Set<String> getInput()
-    {
+    Set<String> getInput() {
         def set = new HashSet<>()
-        set.add( getConfig().download )
-        set.add( getConfig().npmVersion )
-        set.add( getConfig().npmWorkDir )
+        set.add(getConfig().download)
+        set.add(getConfig().npmVersion)
+        set.add(getConfig().npmWorkDir)
         return set
     }
 
     @OutputDirectory
-    File getNpmDir()
-    {
+    File getNpmDir() {
         return getVariant().npmDir
     }
 
     @Internal
-    ExecResult getResult()
-    {
+    ExecResult getResult() {
         return this.result
     }
 
     @Internal
-    protected getConfig()
-    {
-        if ( this.config != null )
-        {
+    protected getConfig() {
+        if (this.config != null) {
             return this.config
         }
 
-        this.config = NodeExtension.get( this.project )
+        this.config = NodeExtension.get(this.project)
         return this.config
     }
 
     @Internal
-    protected getVariant()
-    {
+    protected getVariant() {
         return getConfig().variant
     }
 
-    List<?> getArgs()
-    {
+    List<?> getArgs() {
         return this.args
     }
 
-    @Internal
-    void setArgs( final Iterable<?> value )
-    {
+    void setArgs(final Iterable<?> value) {
         this.args = value.toList()
     }
 
-    void setIgnoreExitValue( final boolean value )
-    {
+    void setIgnoreExitValue(final boolean value) {
         this.runner.ignoreExitValue = value
     }
 
-    void setExecOverrides( final Closure closure )
-    {
+    void setExecOverrides(final Closure closure) {
         this.runner.execOverrides = closure
     }
 
     @TaskAction
-    void exec()
-    {
-        this.runner.arguments.addAll( this.args )
+    void exec() {
+        this.runner.arguments.addAll(this.args)
         this.result = this.runner.execute()
     }
 
-    void configureVersion( String npmVersion )
-    {
-        if ( !npmVersion.isEmpty() )
-        {
-            logger.debug( "Setting npmVersion to ${npmVersion}" )
-            setArgs( ['install', '--global', '--no-save', '--prefix', getVariant().npmDir, "npm@${npmVersion}"] )
+    void configureVersion(String npmVersion) {
+        if (!npmVersion.isEmpty()) {
+            logger.debug("Setting npmVersion to ${npmVersion}")
+            setArgs(['install', '--global', '--no-save', '--prefix', getVariant().npmDir, "npm@${npmVersion}"])
             enabled = true
         }
     }

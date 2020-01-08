@@ -1,7 +1,6 @@
 package com.moowork.gradle.node.variant
 
-class Variant
-{
+class Variant {
     def boolean windows
 
     /* Node */
@@ -10,6 +9,8 @@ class Variant
 
     def String npmScriptFile
 
+    def String npxScriptFile
+
     def File nodeDir
 
     def File nodeBinDir
@@ -17,6 +18,8 @@ class Variant
     /* NPM */
 
     def String npmExec
+
+    def String npxExec
 
     def File npmDir
 

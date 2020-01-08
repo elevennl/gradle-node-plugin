@@ -4,21 +4,26 @@ import org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.BuildTask
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.util.GradleVersion
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
-abstract class AbstractIntegTest
-        extends Specification {
+@RunWithMultipleGradleVersions
+abstract class AbstractIntegTest extends Specification {
+
     @Rule
-    final TemporaryFolder temporaryFolder = new TemporaryFolder()
+    final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     File projectDir
 
     File buildFile
 
-    def setup() {
-        this.projectDir = this.temporaryFolder.root
+    GradleVersion gradleVersion = null
+
+    def setup(GradleVersion gradleVersion) {
+        this.gradleVersion = gradleVersion
+        this.projectDir = this.temporaryFolder.root.toPath().toRealPath().toFile()
         this.buildFile = createFile('build.gradle')
     }
 
@@ -26,23 +31,25 @@ abstract class AbstractIntegTest
         return GradleRunner.create().
                 withProjectDir(this.projectDir).
                 withArguments(args).
-                withPluginClasspath()
+                withPluginClasspath().
+                forwardOutput().
+                withGradleVersion(gradleVersion.version);
     }
 
     protected final BuildResult build(final String... args) {
-        return newRunner(args).build()
+        return newRunner(args).build();
     }
 
     protected final BuildResult buildAndFail(final String... args) {
-        return newRunner(args).buildAndFail()
+        return newRunner(args).buildAndFail();
     }
 
     protected final BuildTask buildTask(final String task) {
-        return build(task).task(':' + task)
+        return build(task).task(':' + task);
     }
 
     protected final File createFile(final String name) {
-        return new File(this.temporaryFolder.getRoot(), name)
+        return new File(this.temporaryFolder.getRoot(), name);
     }
 
     protected final void writeFile(final String name, final String text) {
@@ -55,26 +62,12 @@ abstract class AbstractIntegTest
         writeFile('package.json', text)
     }
 
-    protected final void writeEmptyPackageLockJson() {
-        writeEmptyPackageLockJson('package-lock.json')
-    }
-
-    protected final void writeEmptyPackageLockJson(final String name) {
-        writeFile(name, """ {
-            "name": "example",
-            "lockfileVersion": 1
-        }
-        """)
-    }
-
     protected final void writeEmptyPackageJson() {
         writePackageJson(""" {
             "name": "example",
             "dependencies": {}
         }
         """)
-
-        writeEmptyPackageLockJson()
     }
 
     protected final void writeBuild(final String text) {
@@ -96,15 +89,17 @@ abstract class AbstractIntegTest
         return file
     }
 
-    protected void copyResources(String srcDir, String destination) {
-        ClassLoader classLoader = getClass().getClassLoader()
-        URL resource = classLoader.getResource(srcDir)
+    protected void copyResources(String srcDir, String destination = "") {
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL resource = classLoader.getResource(srcDir);
+
         if (resource == null) {
             throw new RuntimeException("Could not find classpath resource: $srcDir")
         }
 
         File destinationFile = file(destination)
         File resourceFile = new File(resource.toURI())
+
         if (resourceFile.file) {
             FileUtils.copyFile(resourceFile, destinationFile)
         } else {

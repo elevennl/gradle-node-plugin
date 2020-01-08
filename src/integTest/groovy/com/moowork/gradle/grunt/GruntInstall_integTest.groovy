@@ -4,12 +4,10 @@ import com.moowork.gradle.AbstractIntegTest
 import org.gradle.testkit.runner.TaskOutcome
 
 class GruntInstall_integTest
-    extends AbstractIntegTest
-{
-    def 'grunt install'()
-    {
+        extends AbstractIntegTest {
+    def 'grunt install'() {
         given:
-        writeBuild( '''
+        writeBuild('''
             plugins {
                 id 'com.moowork.grunt'
             }
@@ -17,10 +15,10 @@ class GruntInstall_integTest
             node {
                 download = true
             }
-        ''' )
+        ''')
 
         when:
-        def result = buildTask( 'installGrunt' )
+        def result = buildTask('installGrunt')
 
         then:
         result.outcome == TaskOutcome.SUCCESS

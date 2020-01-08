@@ -2,8 +2,7 @@ package com.moowork.gradle.grunt
 
 import org.gradle.api.Project
 
-class GruntExtension
-{
+class GruntExtension {
     final static String NAME = 'grunt'
 
     File workDir
@@ -14,8 +13,7 @@ class GruntExtension
 
     String gruntFile = 'Gruntfile.js'
 
-    GruntExtension( final Project project )
-    {
+    GruntExtension(final Project project) {
         this.workDir = project.projectDir
     }
 }

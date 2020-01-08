@@ -4,12 +4,10 @@ import com.moowork.gradle.AbstractIntegTest
 import org.gradle.testkit.runner.TaskOutcome
 
 class Grunt_integTest
-    extends AbstractIntegTest
-{
-    def 'execute simple task'()
-    {
+        extends AbstractIntegTest {
+    def 'execute simple task'() {
         given:
-        writeBuild( '''
+        writeBuild('''
             plugins {
                 id 'com.moowork.grunt'
             }
@@ -26,18 +24,18 @@ class Grunt_integTest
             task simple(type: GruntTask) {
                 args = ['simple']
             }
-        ''' )
-        writeFile( 'Gruntfile.js', '''
+        ''')
+        writeFile('Gruntfile.js', '''
             module.exports = function(grunt) {
                 grunt.registerTask('simple', []);
             }
-        ''' )
+        ''')
 
         when:
-        def result = build( 'installGrunt', 'simple' )
+        def result = build('installGrunt', 'simple')
 
         then:
-        result.task( ':installGrunt' ).outcome == TaskOutcome.SUCCESS
-        result.task( ':simple' ).outcome == TaskOutcome.SUCCESS
+        result.task(':installGrunt').outcome == TaskOutcome.SUCCESS
+        result.task(':simple').outcome == TaskOutcome.SUCCESS
     }
 }

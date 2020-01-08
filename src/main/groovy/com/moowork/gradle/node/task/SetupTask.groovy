@@ -9,14 +9,14 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.util.GradleVersion
 
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
 class SetupTask
-    extends DefaultTask
-{
+        extends DefaultTask {
     public final static String NAME = 'nodeSetup'
 
     private NodeExtension config
@@ -25,53 +25,46 @@ class SetupTask
 
     private IvyArtifactRepository repo
 
-    private List<ArtifactRepository> allRepos;
+    private List<ArtifactRepository> allRepos
 
-    SetupTask()
-    {
+    SetupTask() {
         this.group = 'Node'
         this.description = 'Download and install a local node/npm version.'
         this.enabled = false
     }
 
     @Input
-    public Set<String> getInput()
-    {
+    Set<String> getInput() {
         configureIfNeeded()
 
         def set = new HashSet<>()
-        set.add( this.config.download )
-        set.add( this.variant.archiveDependency )
-        set.add( this.variant.exeDependency )
+        set.add(this.config.download)
+        set.add(this.variant.archiveDependency)
+        set.add(this.variant.exeDependency)
         return set
     }
 
     @OutputDirectory
-    public File getNodeDir()
-    {
+    File getNodeDir() {
         configureIfNeeded()
         return this.variant.nodeDir
     }
 
-    private void configureIfNeeded()
-    {
-        if ( this.config != null )
-        {
+    private void configureIfNeeded() {
+        if (this.config != null) {
             return
         }
 
-        this.config = NodeExtension.get( this.project )
+        this.config = NodeExtension.get(this.project)
         this.variant = this.config.variant
     }
 
     @TaskAction
-    void exec()
-    {
+    void exec() {
         configureIfNeeded()
         addRepository()
 
-        if ( this.variant.exeDependency )
-        {
+        if (this.variant.exeDependency) {
             copyNodeExe()
         }
 
@@ -81,8 +74,7 @@ class SetupTask
         restoreRepositories()
     }
 
-    private void copyNodeExe()
-    {
+    private void copyNodeExe() {
         this.project.copy {
             from getNodeExeFile()
             into this.variant.nodeBinDir
@@ -90,51 +82,40 @@ class SetupTask
         }
     }
 
-    private void deleteExistingNode()
-    {
-        this.project.delete( getNodeDir().parent )
+    private void deleteExistingNode() {
+        this.project.delete(getNodeDir().parent)
     }
 
-    private void unpackNodeArchive()
-    {
-        if ( getNodeArchiveFile().getName().endsWith( 'zip' ) )
-        {
+    private void unpackNodeArchive() {
+        if (getNodeArchiveFile().getName().endsWith('zip')) {
             this.project.copy {
-                from this.project.zipTree( getNodeArchiveFile() )
+                from this.project.zipTree(getNodeArchiveFile())
                 into getNodeDir().parent
             }
-        }
-        else if ( this.variant.exeDependency )
-        {
+        } else if (this.variant.exeDependency) {
             //Remap lib/node_modules to node_modules (the same directory as node.exe) because that's how the zip dist does it
             this.project.copy {
-                from this.project.tarTree( getNodeArchiveFile() )
+                from this.project.tarTree(getNodeArchiveFile())
                 into this.variant.nodeBinDir
                 eachFile {
                     def m = it.path =~ /^.*?[\\/]lib[\\/](node_modules.*$)/
-                    if ( m.matches() )
-                    {
+                    if (m.matches()) {
                         // remap the file to the root
-                        it.path = m.group( 1 )
-                    }
-                    else
-                    {
+                        it.path = m.group(1)
+                    } else {
                         it.exclude()
                     }
                 }
                 includeEmptyDirs = false
             }
-        }
-        else
-        {
+        } else {
             this.project.copy {
-                from this.project.tarTree( getNodeArchiveFile() )
+                from this.project.tarTree(getNodeArchiveFile())
                 into getNodeDir().parent
             }
             // Fix broken symlink
-            Path npm = Paths.get( variant.nodeBinDir.path, 'npm' )
-            if ( Files.deleteIfExists( npm ) )
-            {
+            Path npm = Paths.get(variant.nodeBinDir.path, 'npm')
+            if (Files.deleteIfExists(npm)) {
                 Files.createSymbolicLink(
                         npm,
                         variant.nodeBinDir.toPath().relativize(Paths.get(variant.npmScriptFile)))
@@ -142,53 +123,62 @@ class SetupTask
         }
     }
 
-    private void setExecutableFlag()
-    {
-        if ( !this.variant.windows )
-        {
-            new File( this.variant.nodeExec ).setExecutable( true )
+    private void setExecutableFlag() {
+        if (!this.variant.windows) {
+            new File(this.variant.nodeExec).setExecutable(true)
         }
     }
 
     @Internal
-    protected File getNodeExeFile()
-    {
-        return resolveSingle( this.variant.exeDependency )
+    protected File getNodeExeFile() {
+        return resolveSingle(this.variant.exeDependency)
     }
 
     @Internal
-    protected File getNodeArchiveFile()
-    {
-        return resolveSingle( this.variant.archiveDependency )
+    protected File getNodeArchiveFile() {
+        return resolveSingle(this.variant.archiveDependency)
     }
 
-    private File resolveSingle( String name )
-    {
-        def dep = this.project.dependencies.create( name )
-        def conf = this.project.configurations.detachedConfiguration( dep )
+    private File resolveSingle(String name) {
+        def dep = this.project.dependencies.create(name)
+        def conf = this.project.configurations.detachedConfiguration(dep)
         conf.transitive = false
-        return conf.resolve().iterator().next();
+        return conf.resolve().iterator().next()
     }
 
-    private void addRepository()
-    {
+    private void addRepository() {
         this.allRepos = new ArrayList<>()
-        this.allRepos.addAll( this.project.repositories )
+        this.allRepos.addAll(this.project.repositories)
         this.project.repositories.clear()
 
         def distUrl = this.config.distBaseUrl
-        this.repo = this.project.repositories.ivy {
-            url distUrl
-            layout 'pattern', {
-                artifact 'v[revision]/[artifact](-v[revision]-[classifier]).[ext]'
-                ivy 'v[revision]/ivy.xml'
+        if (GradleVersion.current().baseVersion >= GradleVersion.version('5.0').baseVersion) {
+            this.repo = this.project.repositories.ivy {
+                url distUrl
+                patternLayout {
+                    artifact 'v[revision]/[artifact](-v[revision]-[classifier]).[ext]'
+                    ivy 'v[revision]/ivy.xml'
+                }
+                metadataSources {
+                    artifact()
+                }
+            }
+        } else {
+            this.repo = this.project.repositories.ivy {
+                url distUrl
+                layout 'pattern', {
+                    artifact 'v[revision]/[artifact](-v[revision]-[classifier]).[ext]'
+                    ivy 'v[revision]/ivy.xml'
+                }
+                metadataSources {
+                    artifact()
+                }
             }
         }
     }
 
-    private void restoreRepositories()
-    {
-        this.project.repositories.clear();
-        this.project.repositories.addAll( this.allRepos );
+    private void restoreRepositories() {
+        this.project.repositories.clear()
+        this.project.repositories.addAll(this.allRepos)
     }
 }

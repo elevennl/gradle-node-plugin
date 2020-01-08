@@ -4,12 +4,10 @@ import com.moowork.gradle.AbstractIntegTest
 import org.gradle.testkit.runner.TaskOutcome
 
 class YarnInstall_integTest
-    extends AbstractIntegTest
-{
-    def 'install packages with yarn'()
-    {
+        extends AbstractIntegTest {
+    def 'install packages with yarn'() {
         given:
-        writeBuild( '''
+        writeBuild('''
             plugins {
                 id 'com.moowork.node'
             }
@@ -20,21 +18,20 @@ class YarnInstall_integTest
                 workDir = file('build/node')
                 yarnWorkDir = file('build/yarn')
             }
-        ''' )
+        ''')
         writeEmptyPackageJson()
-        writeFile( "yarn.lock", "" )
+        writeFile("yarn.lock", "")
 
         when:
-        def result = buildTask( 'yarn' )
+        def result = buildTask('yarn')
 
         then:
         result.outcome == TaskOutcome.SUCCESS
     }
 
-    def 'install packages with yarn and and postinstall task requiring node and yarn'()
-    {
+    def 'install packages with yarn and and postinstall task requiring node and yarn'() {
         given:
-        writeBuild( '''
+        writeBuild('''
             plugins {
                 id 'com.moowork.node'
             }
@@ -44,7 +41,7 @@ class YarnInstall_integTest
                 workDir = file('build/node')
                 yarnWorkDir = file('build/yarn')
             }
-        ''' )
+        ''')
         writePackageJson(""" {
             "name": "example",
             "dependencies": {},
@@ -52,19 +49,18 @@ class YarnInstall_integTest
             "postinstall" : "yarn run versionOutput"
         }
         """)
-        writeFile( "yarn.lock", "" )
+        writeFile("yarn.lock", "")
 
         when:
-        def result = buildTask( 'yarn' )
+        def result = buildTask('yarn')
 
         then:
         result.outcome == TaskOutcome.SUCCESS
     }
 
-    def 'install packages with yarn in different directory'()
-    {
+    def 'install packages with yarn in different directory'() {
         given:
-        writeBuild( '''
+        writeBuild('''
             plugins {
                 id 'com.moowork.node'
             }
@@ -76,16 +72,16 @@ class YarnInstall_integTest
                 yarnWorkDir = file('build/yarn')
                 nodeModulesDir = file('subdirectory')
             }
-        ''' )
-        writeFile( 'subdirectory/package.json', """{
+        ''')
+        writeFile('subdirectory/package.json', """{
             "name": "example",
             "dependencies": {
             }
-        }""" )
-        writeFile( "subdirectory/yarn.lock", "" )
+        }""")
+        writeFile("subdirectory/yarn.lock", "")
 
         when:
-        def result = buildTask( 'yarn' )
+        def result = buildTask('yarn')
 
         then:
         result.outcome == TaskOutcome.SUCCESS

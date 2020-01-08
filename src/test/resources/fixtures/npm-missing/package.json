@@ -1,0 +1,9 @@
+{
+  "name": "example",
+  "dependencies": {
+    "less": "2.6.1"
+  },
+  "scripts": {
+    "echoTest": "echo \"test\" > test.txt"
+  }
+}

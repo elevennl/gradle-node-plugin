@@ -1,48 +1,42 @@
 package com.moowork.gradle.node.npm
 
+import com.moowork.gradle.node.NodePlugin
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecResult
 
-class NpmTask
-        extends DefaultTask {
-    protected NpmExecRunner runner
+class NpxTask extends DefaultTask {
+    protected NpxExecRunner runner
 
     private List<?> args = []
 
     private ExecResult result
 
-    private String[] npmCommand
+    private String command
 
-    NpmTask() {
-        this.runner = new NpmExecRunner(this.project)
+    NpxTask() {
+        this.group = NodePlugin.NODE_GROUP
+        this.runner = new NpxExecRunner(this.project)
         dependsOn(NpmSetupTask.NAME)
-
-        this.project.afterEvaluate {
-            afterEvaluate(this.project.node.nodeModulesDir)
-        }
-    }
-
-    void afterEvaluate(nodeModulesDir) {
-        if (!this.runner.workingDir) {
-            setWorkingDir(nodeModulesDir)
-        }
-
-        if (!this.runner.workingDir.exists()) {
-            this.runner.workingDir.mkdirs()
-        }
     }
 
     void setArgs(final Iterable<?> value) {
         this.args = value.asList()
     }
 
-    void setNpmCommand(String[] cmd) {
-        this.npmCommand = cmd
+    @Input
+    String getCommand() {
+        return command
     }
 
-    @Internal
+    void setCommand(String cmd) {
+        this.command = cmd
+    }
+
+    @Input
     List<?> getArgs() {
         return this.args
     }
@@ -51,8 +45,8 @@ class NpmTask
         this.runner.environment << value
     }
 
-    void setWorkingDir(final Object value) {
-        this.runner.workingDir = value
+    void setWorkingDir(final File workingDir) {
+        this.runner.workingDir = workingDir
     }
 
     void setIgnoreExitValue(final boolean value) {
@@ -63,6 +57,11 @@ class NpmTask
         this.runner.execOverrides = closure
     }
 
+    @Nested
+    NpxExecRunner getRunner() {
+        return runner
+    }
+
     @Internal
     ExecResult getResult() {
         return this.result
@@ -70,8 +69,8 @@ class NpmTask
 
     @TaskAction
     void exec() {
-        if (this.npmCommand != null) {
-            this.runner.arguments.addAll(this.npmCommand)
+        if (this.command != null) {
+            this.runner.arguments.addAll(this.command)
         }
 
         this.runner.arguments.addAll(this.args)

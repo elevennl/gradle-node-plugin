@@ -2,22 +2,20 @@ package com.moowork.gradle.node
 
 import com.moowork.gradle.AbstractProjectTest
 
-class NodeExtensionTest
-    extends AbstractProjectTest
-{
-    def "check default values for extension"()
-    {
+class NodeExtensionTest extends AbstractProjectTest {
+    def "check default values for extension"() {
         when:
-        this.project.apply plugin: 'com.moowork.node'
-        def ext = NodeExtension.get( this.project )
+        this.project.apply plugin: 'nl.eleven.node-gradle.node'
+        def ext = NodeExtension.get(this.project)
 
         then:
         ext != null
         ext.npmCommand == 'npm'
+        ext.npxCommand == 'npx'
         ext.distBaseUrl == 'https://nodejs.org/dist'
         ext.workDir != null
         ext.nodeModulesDir != null
-        ext.version == '10.15.3'
+        ext.version == '10.14.0'
         !ext.download
         ext.npmVersion == ''
     }
