@@ -1,0 +1,15 @@
+repositories {
+    mavenLocal()
+
+    maven {
+        url = 'https://nexus.eleven.nl/content/groups/public'
+    }
+
+    maven {
+        url = 'https://repo.maven.apache.org/maven2'
+    }
+
+    maven {
+        url = 'https://plugins.gradle.org/m2/'
+    }
+}
