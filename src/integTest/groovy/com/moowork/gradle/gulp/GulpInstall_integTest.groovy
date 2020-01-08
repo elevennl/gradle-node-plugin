@@ -4,12 +4,10 @@ import com.moowork.gradle.AbstractIntegTest
 import org.gradle.testkit.runner.TaskOutcome
 
 class GulpInstall_integTest
-    extends AbstractIntegTest
-{
-    def 'gulp install'()
-    {
+        extends AbstractIntegTest {
+    def 'gulp install'() {
         given:
-        writeBuild( '''
+        writeBuild('''
             plugins {
                 id 'com.moowork.gulp'
             }
@@ -17,10 +15,10 @@ class GulpInstall_integTest
             node {
                 download = true
             }
-        ''' )
+        ''')
 
         when:
-        def result = buildTask( 'installGulp' )
+        def result = buildTask('installGulp')
 
         then:
         result.outcome == TaskOutcome.SUCCESS

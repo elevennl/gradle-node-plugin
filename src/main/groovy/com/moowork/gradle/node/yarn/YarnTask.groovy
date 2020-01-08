@@ -5,9 +5,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecResult
 
-class YarnTask
-    extends DefaultTask
-{
+class YarnTask extends DefaultTask {
     protected YarnExecRunner runner
 
     private Iterable<?> args = []
@@ -16,76 +14,63 @@ class YarnTask
 
     private String[] yarnCommand
 
-    public YarnTask()
-    {
-        this.runner = new YarnExecRunner( this.project )
-        dependsOn( YarnSetupTask.NAME )
+    YarnTask() {
+        this.runner = new YarnExecRunner(this.project)
+        dependsOn(YarnSetupTask.NAME)
 
         this.project.afterEvaluate {
-            if ( !this.runner.workingDir )
-            {
+            if (!this.runner.workingDir) {
                 def workingDir = this.project.node.nodeModulesDir
-                setWorkingDir( workingDir )
+                setWorkingDir(workingDir)
             }
 
-            if ( !this.runner.workingDir.exists() )
-            {
-                this.runner.workingDir.mkdirs();
+            if (!this.runner.workingDir.exists()) {
+                this.runner.workingDir.mkdirs()
             }
         }
     }
 
-    void setArgs( final Iterable<?> value )
-    {
+    void setArgs(final Iterable<?> value) {
         this.args = value
     }
 
-    void setYarnCommand( String[] cmd )
-    {
+    void setYarnCommand(String[] cmd) {
         this.yarnCommand = cmd
     }
 
     @Internal
-    Iterable<?> getArgs()
-    {
+    Iterable<?> getArgs() {
         return this.args
     }
 
-    void setEnvironment( final Map<String, ?> value )
-    {
+    void setEnvironment(final Map<String, ?> value) {
         this.runner.environment << value
     }
 
-    void setWorkingDir( final Object value )
-    {
+    void setWorkingDir(final Object value) {
         this.runner.workingDir = value
     }
 
-    void setIgnoreExitValue( final boolean value )
-    {
+    void setIgnoreExitValue(final boolean value) {
         this.runner.ignoreExitValue = value
     }
 
-    void setExecOverrides( final Closure closure )
-    {
+    void setExecOverrides(final Closure closure) {
         this.runner.execOverrides = closure
     }
 
     @Internal
-    ExecResult getResult()
-    {
+    ExecResult getResult() {
         return this.result
     }
 
     @TaskAction
-    void exec()
-    {
-        if ( this.yarnCommand != null )
-        {
-            this.runner.arguments.addAll( this.yarnCommand )
+    void exec() {
+        if (this.yarnCommand != null) {
+            this.runner.arguments.addAll(this.yarnCommand)
         }
 
-        this.runner.arguments.addAll( this.args )
+        this.runner.arguments.addAll(this.args)
         this.result = this.runner.execute()
     }
 }

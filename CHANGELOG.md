@@ -4,7 +4,8 @@ Changelog
 Version 1.4.0 *(unreleased)*
 ----------------------------
 
-* ...
+* Forked code to elevennl account
+* Updated gradle wrapper to 6.0.1
 
 Version 1.3.1 *(2019-03-18)*
 ----------------------------

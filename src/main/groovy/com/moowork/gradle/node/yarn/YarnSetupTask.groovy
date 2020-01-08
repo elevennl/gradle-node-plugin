@@ -8,44 +8,38 @@ import org.gradle.api.tasks.OutputDirectory
  * Setup a specific version of Yarn to be used by the build.
  **/
 class YarnSetupTask
-    extends NpmSetupTask
-{
+        extends NpmSetupTask {
     public final static String NAME = 'yarnSetup'
 
-    YarnSetupTask()
-    {
+    YarnSetupTask() {
         this.group = 'Node'
         this.description = 'Setup a specific version of Yarn to be used by the build.'
 
-        this.enabled = false;
+        this.enabled = false
     }
 
     @Input
-    Set<String> getInput()
-    {
+    Set<String> getInput() {
         def set = new HashSet<>()
-        set.add( this.getConfig().download )
-        set.add( this.getConfig().yarnVersion )
+        set.add(this.getConfig().download)
+        set.add(this.getConfig().yarnVersion)
         return set
     }
 
     @OutputDirectory
-    File getYarnDir()
-    {
+    File getYarnDir() {
         return this.getVariant().yarnDir
     }
 
-    void configureVersion( String yarnVersion )
-    {
+    void configureVersion(String yarnVersion) {
         def pkg = "yarn"
 
-        if ( !yarnVersion.isEmpty() )
-        {
-            logger.debug( "Setting yarnVersion to ${yarnVersion}" )
+        if (!yarnVersion.isEmpty()) {
+            logger.debug("Setting yarnVersion to ${yarnVersion}")
             pkg += "@${yarnVersion}"
         }
 
-        this.setArgs( ['install', '--global', '--no-save', '--prefix', this.getVariant().yarnDir, pkg] )
+        this.setArgs(['install', '--global', '--no-save', '--prefix', this.getVariant().yarnDir, pkg])
         enabled = true
     }
 }

@@ -4,12 +4,10 @@ import com.moowork.gradle.AbstractIntegTest
 import org.gradle.testkit.runner.TaskOutcome
 
 class Gulp_integTest
-    extends AbstractIntegTest
-{
-    def 'execute simple task'()
-    {
+        extends AbstractIntegTest {
+    def 'execute simple task'() {
         given:
-        writeBuild( '''
+        writeBuild('''
             plugins {
                 id 'com.moowork.gulp'
             }
@@ -26,19 +24,19 @@ class Gulp_integTest
             task simple(type: GulpTask) {
                 args = ['simple']
             }
-        ''' )
-        writeFile( 'gulpfile.js', '''
+        ''')
+        writeFile('gulpfile.js', '''
             var gulp = require('gulp');
 
             gulp.task('simple', async function(){
             });
-        ''' )
+        ''')
 
         when:
-        def result = build( 'installGulp', 'simple' )
+        def result = build('installGulp', 'simple')
 
         then:
-        result.task( ':installGulp' ).outcome == TaskOutcome.SUCCESS
-        result.task( ':simple' ).outcome == TaskOutcome.SUCCESS
+        result.task(':installGulp').outcome == TaskOutcome.SUCCESS
+        result.task(':simple').outcome == TaskOutcome.SUCCESS
     }
 }

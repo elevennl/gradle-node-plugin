@@ -1,16 +1,15 @@
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.artifactory'
-apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.gradle.plugin-publish'
 
 ext {
-    bintrayUser = resolveProperty( 'BINTRAY_USER', 'bintrayUser' )
-    bintrayKey = resolveProperty( 'BINTRAY_KEY', 'bintrayKey' )
+    bintrayUser = resolveProperty('BINTRAY_USER', 'bintrayUser')
+    bintrayKey = resolveProperty('BINTRAY_KEY', 'bintrayKey')
 }
 
 publishing {
     publications {
-        mavenJava( MavenPublication ) {
+        mavenJava(MavenPublication) {
             from components.java
             artifact sourcesJar
             artifact groovydocJar
@@ -38,41 +37,31 @@ artifactory {
     }
 }
 
-bintray {
-    user = bintrayUser
-    key = bintrayKey
-    publish = true
-    publications = ['mavenJava']
+pluginBundle {
+    website = 'https://github.com/elevennl/gradle-node-plugin'
+    vcsUrl = 'https://github.com/elevennl/gradle-node-plugin'
 
-    pkg {
-        name = "${project.name}"
-        repo = 'maven'
-        userOrg = 'srs'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/srs/gradle-node-plugin.git'
-        websiteUrl = "https://github.com/srs/gradle-node-plugin"
-        issueTrackerUrl = "https://github.com/srs/gradle-node-plugin/issues"
-        githubRepo = "srs/gradle-node-plugin"
-        labels = ['java', 'gradle', 'node', 'yarn', 'npm', 'grunt', 'gulp']
-        desc = "Gradle plugin for executing node scripts."
-
-        version {
-            vcsTag = "v${project.version}"
-            attributes = ['gradle-plugin': ["com.moowork.node:${project.group}:${project.name}",
-                                            "com.moowork.grunt:${project.group}:${project.name}",
-                                            "com.moowork.gulp:${project.group}:${project.name}"]]
+    plugins {
+        nodePlugin {
+            id = 'nl.eleven.node-gradle.node'
+            displayName = 'Gradle Node Plugin'
+            description = 'Gradle plugin for executing node scripts.'
+            tags = ['java', 'gradle', 'node', 'yarn', 'npm', 'gulp', 'grunt']
         }
+    }
+
+    mavenCoordinates {
+        groupId = 'nl.eleven.node-gradle'
+        artifactId = 'gradle-node-plugin'
     }
 }
 
-String resolveProperty( String envVarKey, String projectPropKey )
-{
+String resolveProperty(String envVarKey, String projectPropKey) {
     String propValue = System.getenv()[envVarKey]
 
-    if ( propValue )
-    {
+    if (propValue) {
         return propValue
     }
 
-    hasProperty( projectPropKey ) ? getProperty( projectPropKey ) : null
+    hasProperty(projectPropKey) ? getProperty(projectPropKey) : null
 }

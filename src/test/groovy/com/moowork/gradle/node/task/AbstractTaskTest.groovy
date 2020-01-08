@@ -7,47 +7,41 @@ import org.gradle.process.ExecResult
 import org.gradle.process.ExecSpec
 
 abstract class AbstractTaskTest
-    extends AbstractProjectTest
-{
-    def ExecResult execResult
+        extends AbstractProjectTest {
+    ExecResult execResult
 
-    def ExecSpec execSpec
+    ExecSpec execSpec
 
-    def Properties props
+    Properties props
 
-    def NodeExtension ext
+    NodeExtension ext
 
-    def setup()
-    {
+    def setup() {
         this.props = new Properties()
-        PlatformHelper.INSTANCE = new PlatformHelper( this.props )
+        PlatformHelper.INSTANCE = new PlatformHelper(this.props)
 
-        this.execResult = Mock( ExecResult )
+        this.execResult = Mock(ExecResult)
 
         this.project.apply plugin: 'com.moowork.node'
-        this.ext = NodeExtension.get( this.project )
+        this.ext = NodeExtension.get(this.project)
 
         mockExec()
     }
 
-    private void mockExec()
-    {
+    private void mockExec() {
         this.project.metaClass.invokeMethod = { String name, Object[] args ->
-            if ( name == 'exec' )
-            {
+            if (name == 'exec') {
                 Closure closure = (Closure) args.first()
-                closure.call( this.execSpec )
+                closure.call(this.execSpec)
                 return this.execResult
-            }
-            else
-            {
-                MetaMethod metaMethod = delegate.class.metaClass.getMetaMethod( name, args )
-                return metaMethod?.invoke( delegate, args )
+            } else {
+                MetaMethod metaMethod = delegate.class.metaClass.getMetaMethod(name, args)
+                return metaMethod?.invoke(delegate, args)
             }
         }
     }
 
-    protected containsPath( final Map<String, ?> env ) {
-        return env['PATH'] != null || env['Path'] != null;
+    protected containsPath(final Map<String, ?> env) {
+        return env['PATH'] != null || env['Path'] != null
     }
 }
