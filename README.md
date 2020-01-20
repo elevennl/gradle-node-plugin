@@ -1,3 +1,8 @@
+# What is the purpose of this fork?
+This is a fork of the [srs/gradle-node-plugin](https://github.com/srs/gradle-node-plugin) but with added support for Gradle 6+ from [node-gradle/gradle-node-plugin](https://github.com/node-gradle/gradle-node-plugin), while still maintaining support for Gulp and Grunt (We still needed this functionality for now)
+
+A lot of thanks goes out to them for making/updating this plugin. 
+
 # Gradle Plugin for Node
 
 This plugin enabled you to use a lot of [NodeJS](https://nodejs.org)-based technologies as part of your 
