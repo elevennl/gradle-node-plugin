@@ -1,3 +1,8 @@
+# DEPRECATED
+This plugin has been deprecated and will not receive any updates. It's only purpose is outlined below. This plugin will not work with Gradle 7+.
+As an alternative we recommend using [node-gradle/gradle-node-plugin](https://github.com/node-gradle/gradle-node-plugin)
+This should be an easy replacement but the `GulpTask` has been removed in favor of the `NpxTask`.
+
 # What is the purpose of this fork?
 This is a fork of the [srs/gradle-node-plugin](https://github.com/srs/gradle-node-plugin) but with added support for Gradle 6+ from [node-gradle/gradle-node-plugin](https://github.com/node-gradle/gradle-node-plugin), while still maintaining support for Gulp and Grunt (We still needed this functionality for now)
 
